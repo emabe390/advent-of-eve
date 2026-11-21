@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advent of Eve</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>Advent of Eve</h1>
+    <p class="tagline">A new fitting puzzle every day. Any fit with the same stats as the answer counts.</p>
+  </header>
+
+  <main>
+    <section id="calendar" class="calendar" aria-label="Puzzle calendar"></section>
+
+    <section id="puzzle" class="puzzle" hidden aria-live="polite">
+      <button id="close" class="ghost" type="button">Back to calendar</button>
+      <h2 id="puzzle-title"></h2>
+      <div id="puzzle-prompt" class="prompt"></div>
+
+      <label for="fit-input">Your fit (paste EFT text)</label>
+      <textarea id="fit-input" spellcheck="false" placeholder="[Loki, My fit]&#10;Heavy Pulse Laser II, Scorch S&#10;..."></textarea>
+
+      <div class="actions">
+        <button id="check" type="button">Check fit</button>
+        <span id="engine-status" class="muted"></span>
+      </div>
+
+      <div id="result" class="result" hidden></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Fits are evaluated in your browser with Pyfa's Eos engine. Nothing is sent to a server.</p>
+  </footer>
+
+  <script src="vendor/pyodide/pyodide.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
