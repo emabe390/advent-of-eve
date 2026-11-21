@@ -173,6 +173,80 @@ def compute_stats(fit) -> dict:
     return out
 
 
+# ---- module roles and hardpoints -------------------------------------------
+# A fit must use the same module types as the answer: if the answer has a
+# webifier, the fit needs a webifier (any webifier); same for scram, point and
+# remote rep. Hardpoint usage must match exactly (turret count and missile count),
+# and so must the weapon families (energy, hybrid, projectile).
+
+ROLE_KEYS = ("role.webifier", "role.scram", "role.point", "role.remote_rep")
+HARDPOINT_KEYS = ("hardpoint.turret", "hardpoint.missile")
+WEAPON_KEYS = ("weapon.energy", "weapon.hybrid", "weapon.projectile")
+
+_REMOTE_REP_GROUPS = {
+    "Remote Armor Repairer",
+    "Mutadaptive Remote Armor Repairer",
+    "Remote Shield Booster",
+    "Remote Hull Repairer",
+}
+_WEAPON_GROUPS = {
+    "Energy Weapon": "weapon.energy",
+    "Hybrid Weapon": "weapon.hybrid",
+    "Projectile Weapon": "weapon.projectile",
+}
+
+
+def _role_of(item) -> str | None:
+    group = item.group.name if item.group else ""
+    name = item.name or ""
+    if group == "Stasis Web":
+        return "role.webifier"
+    if group == "Warp Disrupt Field Generator" or (group == "Warp Scrambler" and "Disruptor" in name):
+        return "role.point"
+    if group == "Warp Scrambler":
+        return "role.scram"
+    if group in _REMOTE_REP_GROUPS:
+        return "role.remote_rep"
+    return None
+
+
+def compute_roles(fit) -> dict:
+    """Count module roles, hardpoints and weapon families on a fit."""
+    from eos.const import FittingHardpoint
+
+    out = {k: 0 for k in ROLE_KEYS + HARDPOINT_KEYS + WEAPON_KEYS}
+    for mod in fit.modules:
+        role = _role_of(mod.item)
+        if role:
+            out[role] += 1
+        if mod.hardpoint == FittingHardpoint.TURRET:
+            out["hardpoint.turret"] += 1
+        elif mod.hardpoint == FittingHardpoint.MISSILE:
+            out["hardpoint.missile"] += 1
+        weapon = _WEAPON_GROUPS.get(mod.item.group.name if mod.item.group else "")
+        if weapon:
+            out[weapon] += 1
+    return {k: float(v) for k, v in out.items()}
+
+
+def compare_roles(actual: dict, target: dict) -> list[str]:
+    """Return role keys that differ.
+
+    role.* must agree on presence (both have it, or both lack it).
+    hardpoint.* and weapon.* must agree on exact counts.
+    """
+    bad = []
+    for key in set(actual) | set(target):
+        a = actual.get(key, 0)
+        t = target.get(key, 0)
+        if key.startswith("role."):
+            if (a > 0) != (t > 0):
+                bad.append(key)
+        elif a != t:
+            bad.append(key)
+    return sorted(bad)
+
+
 def is_valid(fit) -> tuple[bool, list[str]]:
     """Hard fitting limits: slots, CPU and power grid must not be exceeded."""
     problems = []
@@ -210,13 +284,17 @@ def check_fit(eft_text: str, target: dict) -> dict:
     try:
         fit = parse_eft(eft_text)
     except FitError as exc:
-        return {"ok": False, "valid": False, "problems": [], "mismatched": [], "error": str(exc)}
+        return {"ok": False, "valid": False, "problems": [], "mismatched": [], "role_mismatched": [], "error": str(exc)}
     valid, problems = is_valid(fit)
     stats = compute_stats(fit)
     mismatched = compare_stats(stats, target["stats"], target.get("rel_tol", 1e-6), target.get("abs_tol", 1e-6))
+    role_mismatched = []
+    if "roles" in target:
+        role_mismatched = compare_roles(compute_roles(fit), target["roles"])
     return {
-        "ok": valid and not mismatched,
+        "ok": valid and not mismatched and not role_mismatched,
         "valid": valid,
         "problems": problems,
         "mismatched": mismatched,
+        "role_mismatched": role_mismatched,
     }

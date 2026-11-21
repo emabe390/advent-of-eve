@@ -1,7 +1,7 @@
 {
   "day": 1,
-  "title": "Example: shield Loki",
+  "title": "Example: three-turret Loki",
   "unlock": "2026-12-01",
-  "prompt": "EXAMPLE PUZZLE (for testing the pipeline, not a real day).\n\nBuild a shield Loki with a shield extender, a shield hardener and one Heavy Pulse Laser.",
-  "reference_fit": "[Loki, Reference]\nLarge Shield Extender II\nMultispectrum Shield Hardener II\nHeavy Pulse Laser II, Scorch S\n"
+  "prompt": "EXAMPLE PUZZLE (for testing the pipeline, not a real day).\n\nUse 3 turret hardpoints, one webifier, one scrambler, one point and one remote repairer.",
+  "reference_fit": "[Loki, Reference]\nFocused Medium Pulse Laser II, Scorch S\nFocused Medium Pulse Laser II, Scorch S\nFocused Medium Pulse Laser II, Scorch S\nStasis Webifier II\nWarp Scrambler II\nWarp Disruptor II\nSmall Remote Armor Repairer II\n"
 }

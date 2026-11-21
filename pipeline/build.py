@@ -164,7 +164,7 @@ def vendor_pyodide() -> None:
 def build_targets(stage: Path, db: Path) -> None:
     """Compute each puzzle's target stat vector with the same engine the browser uses."""
     sys.path.insert(0, str(stage))
-    from fitcheck.engine import compute_stats, init_engine, is_valid, parse_eft
+    from fitcheck.engine import compute_roles, compute_stats, init_engine, is_valid, parse_eft
 
     init_engine(str(db.resolve()).replace("\\", "/"))
     puzzles = []
@@ -185,6 +185,7 @@ def build_targets(stage: Path, db: Path) -> None:
             "prompt": spec["prompt"],
             "target": {
                 "stats": compute_stats(fit),
+                "roles": compute_roles(fit),
                 "rel_tol": float(spec.get("rel_tol", 1e-6)),
                 "abs_tol": float(spec.get("abs_tol", 1e-6)),
             },

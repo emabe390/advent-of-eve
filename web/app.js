@@ -84,19 +84,25 @@
     renderCalendar();
   }
 
+  // lines: { head: [string], sections: [{ title, items: [string] }] }
   function showResult(kind, lines) {
     const box = $("result");
     box.className = `result ${kind}`;
     box.replaceChildren();
-    for (const line of lines.head) {
+    for (const line of lines.head || []) {
       const p = document.createElement("p");
       p.style.margin = "0";
       p.textContent = line;
       box.append(p);
     }
-    if (lines.items && lines.items.length) {
+    for (const section of lines.sections || []) {
+      if (!section.items.length) continue;
+      const title = document.createElement("p");
+      title.style.margin = "8px 0 0";
+      title.textContent = section.title;
+      box.append(title);
       const ul = document.createElement("ul");
-      for (const item of lines.items) {
+      for (const item of section.items) {
         const li = document.createElement("li");
         li.textContent = item;
         ul.append(li);
@@ -158,6 +164,10 @@ init_engine("/home/pyodide/eve.db")
     "cap.recharge": "Capacitor recharge",
     "speed.max": "Max speed", "align.time": "Align time", "warp.speed": "Warp speed",
     "range.max": "Max target range", "scan.strength": "Scan strength", "sig.radius": "Signature radius",
+    "role.webifier": "Webifier (presence)", "role.scram": "Warp scrambler (presence)",
+    "role.point": "Warp disruptor / point (presence)", "role.remote_rep": "Remote repairer or booster (presence)",
+    "hardpoint.turret": "Turret hardpoints used", "hardpoint.missile": "Missile hardpoints used",
+    "weapon.energy": "Energy weapons", "weapon.hybrid": "Hybrid weapons", "weapon.projectile": "Projectile weapons",
   };
 
   async function checkFit() {
@@ -183,10 +193,13 @@ json.dumps(check_fit(_eft, json.loads(_target)))
         markSolved(active.day);
         showResult("good", { head: [`Equivalent fit. Day ${active.day} solved!`] });
       } else if (!res.valid) {
-        showResult("bad", { head: ["This fit breaks fitting rules:"], items: res.problems });
+        showResult("bad", { head: ["This fit breaks fitting rules:"], sections: [{ title: "Problems:", items: res.problems }] });
       } else {
-        const items = res.mismatched.map((k) => LABELS[k] || k);
-        showResult("bad", { head: ["Not equivalent yet. These stats differ from the answer:"], items });
+        const sections = [
+          { title: "These stats differ from the answer:", items: res.mismatched.map((k) => LABELS[k] || k) },
+          { title: "These module types don't match the answer:", items: (res.role_mismatched || []).map((k) => LABELS[k] || k) },
+        ];
+        showResult("bad", { head: ["Not equivalent yet."], sections });
       }
     } catch (err) {
       setStatus("");

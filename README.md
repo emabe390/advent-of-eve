@@ -3,8 +3,10 @@
 A static advent calendar of EVE Online fitting puzzles. Each day's door opens on its date. Players paste an
 EFT fit and it is checked in the browser with Pyfa's Eos engine (Pyfa v2.70.0, the newest release).
 
-A fit is correct when every stat (price excluded) matches the reference fit's stats. Different modules with the same
-numbers count as the same answer.
+A fit is correct when every stat (price excluded) matches the reference fit's stats, and it uses the same module
+types as the reference (webifier, scram, point, remote rep present or absent; the same turret and missile hardpoint
+counts; the same weapon families). Different modules with the same stats and types count as the same answer.
+See [puzzles/README.md](puzzles/README.md) for the exact rules.
 
 ## Layout
 
