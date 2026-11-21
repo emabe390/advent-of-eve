@@ -11,12 +11,14 @@
   let active = null; // puzzle currently open
 
   // ---- dates -------------------------------------------------------------
+  // Doors open on UTC dates: "today" is the current UTC calendar day.
+  // ?today=YYYY-MM-DD overrides this for testing only.
   function todayString() {
     const override = new URLSearchParams(location.search).get("today");
     if (override && /^\d{4}-\d{2}-\d{2}$/.test(override)) return override;
     const d = new Date();
     const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
   }
 
   // ---- local "solved" memory (per-viewer convenience only) ----------------
